@@ -1,0 +1,33 @@
+[Unit]
+Description=Proxy HLS to Elemental MediaPackage
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=proxyservice
+Restart=on-failure
+RestartSec=10
+Environment=PROXY_PORT=8080
+
+#Credentials provided by EMP specific to an endpoint
+Environment=EMP_USERNAME=
+Environment=EMP_PASSWORD=
+
+#EMP Endpoint to proxy data to
+#Do not include the 'channel' at the end of the provided URL, but do include a trailing slash
+Environment=EMP_PATH=
+
+ExecStart=/usr/local/bin/emp-proxy
+
+#Make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/emp-proxy
+ExecStartPre=/bin/chown proxyservice /var/log/emp-proxy
+ExecStartPre=/bin/chmod 755 /var/log/emp-proxy
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=emp-proxy
+
+[Install]
+WantedBy=multi-user.target
